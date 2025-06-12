@@ -7,8 +7,8 @@ class Vuelos(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     origen: str = Field(index=True)
     destino: str
-    fecha: float
-    pagado: bool = Field(default=True)
+    fecha: str
+    pagado: bool = Field(default=False)
 
 
 class User(SQLModel, table=True):

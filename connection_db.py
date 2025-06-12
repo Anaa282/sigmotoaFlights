@@ -5,16 +5,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DATABASE_URL = "postgresql://uvh0am58ydkjrmcz0k4u:QuOPsETLu18YDCiAwOlurzHxSdWabS@bnscyztw6flrnuyfbeht-postgresql.services.clever-cloud.com:50013/bnscyztw6flrnuyfbeht"
 
-DEFAULT_DB_URL = "sqlite:///data.db"
-DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DB_URL)
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL no encontrada en las variables de entorno o en el archivo .env")
 
-
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,
-    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-)
+engine = create_engine(DATABASE_URL, echo=False)
 
 def create_db_and_tables():
     try:
@@ -23,6 +19,7 @@ def create_db_and_tables():
         print("Tablas de la base de datos creadas/verificadas exitosamente.")
     except Exception as e:
         print(f"ERROR al crear/verificar tablas de la base de datos: {e}")
+
 
 def get_session() -> Generator[Session, None, None]:
     with Session(engine) as session:
