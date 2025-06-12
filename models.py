@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Vuelos(SQLModel, table=True):
-    __tablename__ = "vuelos"
+    __tablename__ = "Vuelos"
     id: Optional[int] = Field(default=None, primary_key=True)
     origen: str = Field(index=True)
     destino: str
@@ -13,7 +13,7 @@ class Vuelos(SQLModel, table=True):
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "usuarios"
+    __tablename__ = "Usuarios"
     id: Optional[int] = Field(default=None, primary_key=True)
     nombre: str = Field(index=True, unique=True)
     reservas: str = Field(default="")
