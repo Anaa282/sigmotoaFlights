@@ -1,256 +1,106 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session
-from typing import List, Optional
+from typing import List
 from connection_db import get_session
 from models import User, Pet, Vuelos, VueloSearch, VueloReserva
-from operations import (
-    create_user, get_user, get_user_by_name, get_all_users, update_user, delete_user,
-    create_pet, get_pet, get_all_pets, get_user_pets, update_pet, delete_pet,
-    assign_pet_to_user, unassign_pet_from_user,
-    create_vuelo, get_vuelo, search_vuelos, update_vuelo, delete_vuelo
+import operations
+
+app = FastAPI(
+    title="Sistema de Gestión de Vuelos",
+    description="API para gestionar vuelos, usuarios y mascotas",
+    version="1.0.0"
 )
-from pydantic import BaseModel
 
-app = FastAPI()
-
-# Modelos Pydantic para las peticiones
-class UserCreate(BaseModel):
-    nombre: str
-    reservas: str = ""
-    pet: bool = True
-    pet_id: Optional[int] = None
-
-class UserUpdate(BaseModel):
-    nombre: Optional[str] = None
-    reservas: Optional[str] = None
-    pet: Optional[bool] = None
-    pet_id: Optional[int] = None
-
-class PetCreate(BaseModel):
-    nombre: str
-    size: str
-    user_id: Optional[int] = None
-
-class PetUpdate(BaseModel):
-    new_nombre: Optional[str] = None
-    size: Optional[str] = None
-    user_id: Optional[int] = None
-
-class VueloCreate(BaseModel):
-    origen: str
-    destino: str
-    fecha: float
-    pagado: bool = True
-
-# Endpoints para Vuelos
-@app.post("/vuelos/", response_model=Vuelos)
-def create_new_vuelo(
-    vuelo: VueloCreate,
+# Endpoints de Vuelos
+@app.post("/vuelos/", response_model=Vuelos, tags=["Vuelos"])
+def crear_vuelo(
+    origen: str,
+    destino: str,
+    fecha: float,
+    pagado: bool = True,
     session: Session = Depends(get_session)
 ):
-    return create_vuelo(
-        session=session,
-        origen=vuelo.origen,
-        destino=vuelo.destino,
-        fecha=vuelo.fecha,
-        pagado=vuelo.pagado
+
+    return operations.crear_vuelo(session, origen, destino, fecha, pagado)
+
+@app.post("/vuelos/buscar/", response_model=List[Vuelos], tags=["Vuelos"])
+def buscar_vuelos(
+    busqueda: VueloSearch,
+    session: Session = Depends(get_session)
+):
+
+    return operations.buscar_vuelos(
+        session,
+        origen=busqueda.origen,
+        destino=busqueda.destino,
+        fecha=busqueda.fecha
     )
 
-@app.get("/vuelos/search", response_model=List[Vuelos])
-def search_vuelos_endpoint(
-    search_params: VueloSearch,
-    session: Session = Depends(get_session)
-):
-    return search_vuelos(
-        session=session,
-        origen=search_params.origen,
-        destino=search_params.destino,
-        fecha=search_params.fecha
-    )
 
-@app.get("/vuelos/{vuelo_id}", response_model=Vuelos)
-def get_vuelo_by_id(
-    vuelo_id: int,
-    session: Session = Depends(get_session)
-):
-    db_vuelo = get_vuelo(session, vuelo_id)
-    if not db_vuelo:
-        raise HTTPException(status_code=404, detail="Vuelo no encontrado")
-    return db_vuelo
-
-# Endpoints para Usuarios
-@app.post("/users/", response_model=User)
-def create_new_user(
-    user: UserCreate,
-    session: Session = Depends(get_session)
-):
-    db_user = get_user_by_name(session, user.nombre)
-    if db_user:
-        raise HTTPException(
-            status_code=400,
-            detail="El nombre de usuario ya está registrado"
-        )
-    return create_user(
-        session=session,
-        nombre=user.nombre,
-        reservas=user.reservas,
-        pet=user.pet,
-        pet_id=user.pet_id
-    )
-
-@app.get("/users/", response_model=List[User])
-def read_users(
-    skip: int = 0,
-    limit: int = 100,
-    session: Session = Depends(get_session)
-):
-    users = get_all_users(session)
-    return users[skip : skip + limit]
-
-@app.get("/users/{user_id}", response_model=User)
-def read_user(
-    user_id: int,
-    session: Session = Depends(get_session)
-):
-    db_user = get_user(session, user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return db_user
-
-@app.get("/users/name/{nombre}", response_model=User)
-def read_user_by_name(
+@app.post("/usuarios/", response_model=User, tags=["Usuarios"])
+def crear_usuario(
     nombre: str,
+    reservas: str = "",
+    pet: bool = True,
     session: Session = Depends(get_session)
 ):
-    db_user = get_user_by_name(session, nombre)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return db_user
 
-@app.put("/users/{user_id}", response_model=User)
-def update_user_info(
-    user_id: int,
-    user: UserUpdate,
+    try:
+        return operations.crear_usuario(session, nombre, reservas, pet)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/reservas/", tags=["Reservas"])
+def crear_reserva(
+    reserva: VueloReserva,
     session: Session = Depends(get_session)
 ):
-    updated_user = update_user(
-        session=session,
-        user_id=user_id,
-        nombre=user.nombre,
-        reservas=user.reservas,
-        pet=user.pet,
-        pet_id=user.pet_id
-    )
-    if not updated_user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return updated_user
 
-@app.delete("/users/{user_id}")
-def delete_user_by_id(
-    user_id: int,
-    session: Session = Depends(get_session)
-):
-    success = delete_user(session, user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return {"message": "Usuario eliminado exitosamente"}
+    if operations.reservar_vuelo(session, reserva.vuelo_id, reserva.user_id):
+        return {"mensaje": "Reserva creada exitosamente"}
+    raise HTTPException(status_code=404, detail="Usuario o vuelo no encontrado")
 
-# Endpoints para Mascotas
-@app.post("/pets/", response_model=Pet)
-def create_new_pet(
-    pet: PetCreate,
-    session: Session = Depends(get_session)
-):
-    return create_pet(
-        session=session,
-        nombre=pet.nombre,
-        size=pet.size,
-        user_id=pet.user_id
-    )
-
-@app.get("/pets/", response_model=List[Pet])
-def read_pets(
-    skip: int = 0,
-    limit: int = 100,
-    session: Session = Depends(get_session)
-):
-    pets = get_all_pets(session)
-    return pets[skip : skip + limit]
-
-@app.get("/pets/{id_mascotas}/{nombre}", response_model=Pet)
-def read_pet(
-    id_mascotas: int,
+# Endpoints de Mascotas
+@app.post("/mascotas/", response_model=Pet, tags=["Mascotas"])
+def crear_mascota(
     nombre: str,
+    size: str,
+    user_id: int = None,
     session: Session = Depends(get_session)
 ):
-    db_pet = get_pet(session, id_mascotas, nombre)
-    if not db_pet:
+    """Crea una nueva mascota en el sistema."""
+    return operations.crear_mascota(session, nombre, size, user_id)
+
+@app.post("/usuarios/{user_id}/mascotas/{id_mascota}", tags=["Usuarios", "Mascotas"])
+def asignar_mascota(
+    user_id: int,
+    id_mascota: int,
+    session: Session = Depends(get_session)
+):
+    """Asigna una mascota a un usuario."""
+    if operations.asignar_mascota_usuario(session, user_id, id_mascota):
+        return {"mensaje": "Mascota asignada exitosamente"}
+    raise HTTPException(status_code=404, detail="Usuario o mascota no encontrado")
+
+# Endpoints de consulta
+@app.get("/usuarios/{user_id}", response_model=User, tags=["Usuarios"])
+def obtener_usuario(
+    user_id: int,
+    session: Session = Depends(get_session)
+):
+    """Obtiene información de un usuario específico."""
+    usuario = operations.obtener_usuario(session, user_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+
+@app.get("/mascotas/{id_mascota}", response_model=Pet, tags=["Mascotas"])
+def obtener_mascota(
+    id_mascota: int,
+    session: Session = Depends(get_session)
+):
+    """Obtiene información de una mascota específica."""
+    mascota = operations.obtener_mascota(session, id_mascota)
+    if not mascota:
         raise HTTPException(status_code=404, detail="Mascota no encontrada")
-    return db_pet
-
-@app.get("/users/{user_id}/pets", response_model=List[Pet])
-def read_user_pets_list(
-    user_id: int,
-    session: Session = Depends(get_session)
-):
-    pets = get_user_pets(session, user_id)
-    return pets
-
-@app.put("/pets/{id_mascotas}/{nombre}", response_model=Pet)
-def update_pet_info(
-    id_mascotas: int,
-    nombre: str,
-    pet: PetUpdate,
-    session: Session = Depends(get_session)
-):
-    updated_pet = update_pet(
-        session=session,
-        id_mascotas=id_mascotas,
-        nombre=nombre,
-        new_nombre=pet.new_nombre,
-        size=pet.size,
-        user_id=pet.user_id
-    )
-    if not updated_pet:
-        raise HTTPException(status_code=404, detail="Mascota no encontrada")
-    return updated_pet
-
-@app.delete("/pets/{id_mascotas}/{nombre}")
-def delete_pet_by_id(
-    id_mascotas: int,
-    nombre: str,
-    session: Session = Depends(get_session)
-):
-    success = delete_pet(session, id_mascotas, nombre)
-    if not success:
-        raise HTTPException(status_code=404, detail="Mascota no encontrada")
-    return {"message": "Mascota eliminada exitosamente"}
-
-# Endpoints para gestionar relaciones Usuario-Mascota
-@app.post("/users/{user_id}/pets/{pet_id}/{pet_nombre}")
-def assign_pet_to_user_endpoint(
-    user_id: int,
-    pet_id: int,
-    pet_nombre: str,
-    session: Session = Depends(get_session)
-):
-    success = assign_pet_to_user(session, user_id, pet_id, pet_nombre)
-    if not success:
-        raise HTTPException(
-            status_code=400,
-            detail="No se pudo asignar la mascota al usuario"
-        )
-    return {"message": "Mascota asignada exitosamente"}
-
-@app.delete("/users/{user_id}/pet")
-def unassign_pet_from_user_endpoint(
-    user_id: int,
-    session: Session = Depends(get_session)
-):
-    success = unassign_pet_from_user(session, user_id)
-    if not success:
-        raise HTTPException(
-            status_code=400,
-            detail="No se pudo desasignar la mascota del usuario"
-        )
-    return {"message": "Mascota desasignada exitosamente"}
+    return mascota
