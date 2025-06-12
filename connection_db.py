@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = "postgresql://uvh0am58ydkjrmcz0k4u:QuOPsETLu18YDCiAwOlurzHxSdWabS@bnscyztw6flrnuyfbeht-postgresql.services.clever-cloud.com:50013/bnscyztw6flrnuyfbeht"
+DATABASE_URL = "postgresql://parcial_finalds_user:2yseqW7n6c72tnPOQKqImoljnDfBt0Nw@dpg-d15g19vdiees7380pgag-a.oregon-postgres.render.com/parcial_finalds"
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL no encontrada en las variables de entorno o en el archivo .env")
