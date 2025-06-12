@@ -20,6 +20,11 @@ Es una API donde se gestionan usuarios, mascotas y vuelos.
 ## LINK
 Dirigete a https://sigmotoaflights-uout.onrender.com para ver nuestro resultado
 
+## Estructura 
+
+![estr](https://github.com/user-attachments/assets/adbdd5b3-e6cf-447a-af09-2cc90084dac5)
+
+
 
 ## Instrucciones
 
