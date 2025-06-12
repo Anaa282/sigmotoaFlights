@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Operaciones de Vuelos
 def crear_vuelo(session: Session, origen: str, destino: str, fecha: float, pagado: bool = True) -> Vuelos:
-    """Crea un nuevo vuelo."""
+
     db_vuelo = Vuelos(origen=origen, destino=destino, fecha=fecha, pagado=pagado)
     session.add(db_vuelo)
     session.commit()
@@ -18,7 +18,7 @@ def buscar_vuelos(
     destino: Optional[str] = None,
     fecha: Optional[float] = None
 ) -> List[Vuelos]:
-    """Busca vuelos según los criterios especificados."""
+
     query = select(Vuelos)
     if origen:
         query = query.where(Vuelos.origen == origen)
@@ -29,12 +29,12 @@ def buscar_vuelos(
     return session.exec(query).all()
 
 def obtener_vuelo(session: Session, vuelo_id: int) -> Optional[Vuelos]:
-    """Obtiene un vuelo por su ID."""
+
     return session.get(Vuelos, vuelo_id)
 
 # Operaciones de Usuario
 def crear_usuario(session: Session, nombre: str, reservas: str = "", pet: bool = True) -> User:
-    """Crea un nuevo usuario."""
+
     db_usuario = User(nombre=nombre, reservas=reservas, pet=pet)
     session.add(db_usuario)
     session.commit()
@@ -42,27 +42,25 @@ def crear_usuario(session: Session, nombre: str, reservas: str = "", pet: bool =
     return db_usuario
 
 def obtener_usuario(session: Session, user_id: int) -> Optional[User]:
-    """Obtiene un usuario por su ID."""
+
     return session.get(User, user_id)
 
 def reservar_vuelo(session: Session, vuelo_id: int, user_id: int) -> bool:
-    """Realiza una reserva de vuelo para un usuario."""
+
     usuario = obtener_usuario(session, user_id)
     vuelo = obtener_vuelo(session, vuelo_id)
     
     if not usuario or not vuelo:
         return False
-    
-    # Añadir el vuelo a las reservas del usuario
     nuevas_reservas = f"{usuario.reservas},{vuelo_id}" if usuario.reservas else str(vuelo_id)
     usuario.reservas = nuevas_reservas
     session.add(usuario)
     session.commit()
     return True
 
-# Operaciones de Mascotas
+
 def crear_mascota(session: Session, nombre: str, size: str, user_id: Optional[int] = None) -> Pet:
-    """Crea una nueva mascota."""
+
     db_mascota = Pet(nombre=nombre, size=size, user_id=user_id)
     session.add(db_mascota)
     session.commit()

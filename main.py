@@ -6,12 +6,9 @@ from models import User, Pet, Vuelos, VueloSearch, VueloReserva
 import operations
 
 app = FastAPI(
-    title="Sistema de Gestión de Vuelos",
-    description="API para gestionar vuelos, usuarios y mascotas",
-    version="1.0.0"
 )
 
-# Endpoints de Vuelos
+
 @app.post("/vuelos/", response_model=Vuelos, tags=["Vuelos"])
 def crear_vuelo(
     origen: str,
