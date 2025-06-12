@@ -1,7 +1,7 @@
 from sqlmodel import create_engine, Session
 from sqlmodel import SQLModel
 
-DATABASE_URL = "postgresql://postgres:1234@localhost:5432/flight_booking"
+DATABASE_URL = "postgresql://parcial_finalds_user:2yseqW7n6c72tnPOQKqImoljnDfBt0Nw@dpg-d15g19vdiees7380pgag-a.oregon-postgres.render.com/parcial_finalds"
 engine = create_engine(DATABASE_URL, echo=True)
 
 def get_session():
