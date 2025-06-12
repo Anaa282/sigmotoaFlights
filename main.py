@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from typing import List
 from connection_db import get_session
@@ -7,13 +8,18 @@ import operations
 from connection_db import init_db
 
 app = FastAPI()
-
+templates = Jinja2Templates(directory="templates")
 
 app.on_event("startup")
 async def on_startup():
     init_db()
 
-
+@app.get("/")
+@app.get("/index.html")
+async def read_root(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "titulo": "¡Bienvenido a mi Proyecto FastAPI!"})
 @app.post("/vuelos/", response_model=Vuelos, tags=["Vuelos"])
 def crear_vuelo(
     origen: str,

@@ -1,10 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Vuelos y Mascotas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        .formulario {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 200px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
+    <h1>Sistema de Vuelos y Mascotas</h1>
 
+    <div class="formulario">
+        <h2>Crear Usuario</h2>
+        <form action="/usuarios/" method="POST">
+            <div>
+                <label for="nombre">Nombre:</label><br>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <button type="submit">Crear Usuario</button>
+        </form>
+    </div>
+
+    <div class="formulario">
+        <h2>Crear Mascota</h2>
+        <form action="/mascotas/" method="POST">
+            <div>
+                <label for="nombre_mascota">Nombre:</label><br>
+                <input type="text" id="nombre_mascota" name="nombre" required>
+            </div>
+            <div>
+                <label for="size">Tamaño:</label><br>
+                <input type="text" id="size" name="size" required>
+            </div>
+            <div>
+                <label for="user_id">ID del Usuario (opcional):</label><br>
+                <input type="number" id="user_id" name="user_id">
+            </div>
+            <button type="submit">Crear Mascota</button>
+        </form>
+    </div>
+
+    <div class="formulario">
+        <h2>Crear Vuelo</h2>
+        <form action="/vuelos/" method="POST">
+            <div>
+                <label for="origen">Origen:</label><br>
+                <input type="text" id="origen" name="origen" required>
+            </div>
+            <div>
+                <label for="destino">Destino:</label><br>
+                <input type="text" id="destino" name="destino" required>
+            </div>
+            <div>
+                <label for="fecha">Fecha:</label><br>
+                <input type="text" id="fecha" name="fecha" required placeholder="YYYY-MM-DD">
+            </div>
+            <button type="submit">Crear Vuelo</button>
+        </form>
+    </div>
+
+    <div class="formulario">
+        <h2>Buscar Vuelos</h2>
+        <form action="/vuelos/buscar/" method="POST">
+            <div>
+                <label for="buscar_origen">Origen:</label><br>
+                <input type="text" id="buscar_origen" name="origen" required>
+            </div>
+            <div>
+                <label for="buscar_destino">Destino:</label><br>
+                <input type="text" id="buscar_destino" name="destino" required>
+            </div>
+            <div>
+                <label for="buscar_fecha">Fecha:</label><br>
+                <input type="text" id="buscar_fecha" name="fecha" required placeholder="YYYY-MM-DD">
+            </div>
+            <button type="submit">Buscar Vuelos</button>
+        </form>
+    </div>
+
+    <div class="formulario">
+        <h2>Crear Reserva</h2>
+        <form action="/reservas/" method="POST">
+            <div>
+                <label for="vuelo_id">ID del Vuelo:</label><br>
+                <input type="number" id="vuelo_id" name="vuelo_id" required>
+            </div>
+            <div>
+                <label for="reserva_user_id">ID del Usuario:</label><br>
+                <input type="number" id="reserva_user_id" name="user_id" required>
+            </div>
+            <button type="submit">Crear Reserva</button>
+        </form>
+    </div>
+
+    <div class="formulario">
+        <h2>Asignar Mascota a Usuario</h2>
+        <form action="/usuarios/" method="POST">
+            <div>
+                <label for="asignar_user_id">ID del Usuario:</label><br>
+                <input type="number" id="asignar_user_id" name="user_id" required>
+            </div>
+            <div>
+                <label for="asignar_mascota_id">ID de la Mascota:</label><br>
+                <input type="number" id="asignar_mascota_id" name="id_mascota" required>
+            </div>
+            <button type="submit">Asignar Mascota</button>
+        </form>
+    </div>
 </body>
 </html>
