@@ -17,8 +17,8 @@ def buscar_vuelos(session: Session, origen: str, destino: str, fecha: str) -> Li
     ).all()
     return vuelos
 
-def crear_usuario(session: Session, nombre: str, reservas: str, pet: bool) -> User:
-    usuario = User(nombre=nombre, reservas=reservas, pet=pet)
+def crear_usuario(session: Session, nombre: str, pet_id: int = None) -> User:
+    usuario = User(nombre=nombre, pet_id=pet_id, reservas="")
     session.add(usuario)
     session.commit()
     session.refresh(usuario)
@@ -33,8 +33,6 @@ def reservar_vuelo(session: Session, vuelo_id: int, user_id: int) -> bool:
             usuario.reservas = f"{usuario.reservas},{vuelo_id}"
         else:
             usuario.reservas = str(vuelo_id)
-        
-        vuelo.pagado = True
         session.commit()
         return True
     return False
@@ -52,6 +50,7 @@ def asignar_mascota_usuario(session: Session, user_id: int, id_mascota: int) -> 
     
     if usuario and mascota:
         mascota.user_id = user_id
+        usuario.pet_id = id_mascota
         session.commit()
         return True
     return False
@@ -73,6 +72,9 @@ def borrar_usuario(session: Session, user_id: int) -> bool:
 def borrar_mascota(session: Session, id_mascota: int) -> bool:
     mascota = session.query(Pet).filter(Pet.id == id_mascota).first()
     if mascota:
+        usuario = session.query(User).filter(User.pet_id == id_mascota).first()
+        if usuario:
+            usuario.pet_id = None
         session.delete(mascota)
         session.commit()
         return True

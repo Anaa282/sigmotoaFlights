@@ -1,25 +1,24 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlmodel import Session
 from typing import List
 from connection_db import get_session
 from models import User, Pet, Vuelos, VueloSearch, VueloReserva
 import operations
 
-app = FastAPI(
-)
+app = FastAPI()
 
 @app.post("/vuelos/", response_model=Vuelos, tags=["Vuelos"])
 def crear_vuelo(
     origen: str,
     destino: str,
     fecha: str,
-
     session: Session = Depends(get_session)
 ):
     try:
-        return operations.crear_vuelo(session, origen, destino, fecha)
+        nuevo_vuelo = operations.crear_vuelo(session, origen, destino, fecha, False)
+        return nuevo_vuelo
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al crear vuelo: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/vuelos/buscar/", response_model=List[Vuelos], tags=["Vuelos"])
 def buscar_vuelos(
@@ -27,31 +26,23 @@ def buscar_vuelos(
     session: Session = Depends(get_session)
 ):
     try:
-        vuelos = operations.buscar_vuelos(
-            session,
-            origen=busqueda.origen,
-            destino=busqueda.destino,
-            fecha=busqueda.fecha
-        )
+        vuelos = operations.buscar_vuelos(session, busqueda.origen, busqueda.destino, busqueda.fecha)
         if not vuelos:
-            raise HTTPException(status_code=404, detail="No se encontraron vuelos con los criterios especificados")
+            raise HTTPException(status_code=404, detail="No se encontraron vuelos")
         return vuelos
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error en la búsqueda: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/usuarios/", response_model=User, tags=["Usuarios"])
 def crear_usuario(
     nombre: str,
-    reservas: str = "",
-    pet: bool = True,
+    pet_id: int = None,
     session: Session = Depends(get_session)
 ):
     try:
-        return operations.crear_usuario(session, nombre, reservas, pet)
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        return operations.crear_usuario(session, nombre, pet_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al crear usuario: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/reservas/", tags=["Reservas"])
 def crear_reserva(
@@ -63,7 +54,7 @@ def crear_reserva(
             return {"mensaje": "Reserva creada exitosamente"}
         raise HTTPException(status_code=404, detail="Usuario o vuelo no encontrado")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al crear reserva: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/mascotas/", response_model=Pet, tags=["Mascotas"])
 def crear_mascota(
@@ -74,10 +65,8 @@ def crear_mascota(
 ):
     try:
         return operations.crear_mascota(session, nombre, size, user_id)
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al crear mascota: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/usuarios/{user_id}/mascotas/{id_mascota}", tags=["Usuarios", "Mascotas"])
 def asignar_mascota(
@@ -90,7 +79,7 @@ def asignar_mascota(
             return {"mensaje": "Mascota asignada exitosamente"}
         raise HTTPException(status_code=404, detail="Usuario o mascota no encontrado")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al asignar mascota: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/usuarios/{user_id}", response_model=User, tags=["Usuarios"])
 def obtener_usuario(
@@ -103,7 +92,7 @@ def obtener_usuario(
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         return usuario
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al obtener usuario: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/mascotas/{id_mascota}", response_model=Pet, tags=["Mascotas"])
 def obtener_mascota(
@@ -116,7 +105,7 @@ def obtener_mascota(
             raise HTTPException(status_code=404, detail="Mascota no encontrada")
         return mascota
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al obtener mascota: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.delete("/usuarios/{user_id}", tags=["Usuarios"])
 def borrar_usuario(
