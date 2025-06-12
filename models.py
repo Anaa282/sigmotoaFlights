@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel
 
@@ -12,6 +12,7 @@ class Vuelos(SQLModel, table=True):
 
 
 class User(SQLModel, table=True):
+    __tablename__ = "usuarios"
     id: Optional[int] = Field(default=None, primary_key=True)
     nombre: str = Field(index=True, unique=True)
     reservas: str = Field(default="")
@@ -29,7 +30,7 @@ class Pet(SQLModel, table=True):
 class VueloSearch(BaseModel):
     origen: Optional[str] = None
     destino: Optional[str] = None
-    fecha: Optional[float] = None
+    fecha: Optional[str] = None
 
 
 class VueloReserva(BaseModel):
