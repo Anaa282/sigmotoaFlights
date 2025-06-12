@@ -60,7 +60,7 @@ def crear_reserva(
         return {"mensaje": "Reserva creada exitosamente"}
     raise HTTPException(status_code=404, detail="Usuario o vuelo no encontrado")
 
-# Endpoints de Mascotas
+
 @app.post("/mascotas/", response_model=Pet, tags=["Mascotas"])
 def crear_mascota(
     nombre: str,
@@ -68,7 +68,7 @@ def crear_mascota(
     user_id: int = None,
     session: Session = Depends(get_session)
 ):
-    """Crea una nueva mascota en el sistema."""
+
     return operations.crear_mascota(session, nombre, size, user_id)
 
 @app.post("/usuarios/{user_id}/mascotas/{id_mascota}", tags=["Usuarios", "Mascotas"])
@@ -77,7 +77,7 @@ def asignar_mascota(
     id_mascota: int,
     session: Session = Depends(get_session)
 ):
-    """Asigna una mascota a un usuario."""
+
     if operations.asignar_mascota_usuario(session, user_id, id_mascota):
         return {"mensaje": "Mascota asignada exitosamente"}
     raise HTTPException(status_code=404, detail="Usuario o mascota no encontrado")
@@ -88,7 +88,7 @@ def obtener_usuario(
     user_id: int,
     session: Session = Depends(get_session)
 ):
-    """Obtiene información de un usuario específico."""
+
     usuario = operations.obtener_usuario(session, user_id)
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -99,7 +99,7 @@ def obtener_mascota(
     id_mascota: int,
     session: Session = Depends(get_session)
 ):
-    """Obtiene información de una mascota específica."""
+
     mascota = operations.obtener_mascota(session, id_mascota)
     if not mascota:
         raise HTTPException(status_code=404, detail="Mascota no encontrada")
