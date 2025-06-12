@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class Vuelos(SQLModel, table=True):
+    __tablename__ = "vuelos"
     id: Optional[int] = Field(default=None, primary_key=True)
     origen: str = Field(index=True)
     destino: str

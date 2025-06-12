@@ -1,21 +1,21 @@
-from sqlmodel import create_engine, Session
-from sqlmodel import SQLModel
-
-DATABASE_URL = "postgresql://postgres:1234@localhost:5432/flight_booking"
-engine = create_engine(DATABASE_URL, echo=True)
-
-def get_session():
-    with Session(engine) as session:
-        yield session
+from sqlmodel import SQLModel, create_engine
+from models import*
+from dotenv import load_dotenv
+import os
 
 def init_db():
-    engine = create_engine(DATABASE_URL)
+    load_dotenv()
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise ValueError("DATABASE_URL no encontrada en las variables de entorno")
+
+    engine = create_engine(database_url)
 
     try:
         print("Creando tablas si no existen...")
         SQLModel.metadata.create_all(engine)
         print("¡Proceso de verificación/creación de tablas completado exitosamente!")
-        return engine
 
     except Exception as e:
         print(f"Error durante la actualización de la base de datos: {e}")

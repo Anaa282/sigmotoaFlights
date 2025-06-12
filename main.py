@@ -4,14 +4,14 @@ from typing import List
 from connection_db import get_session
 from models import User, Pet, Vuelos, VueloSearch, VueloReserva
 import operations
-from connection_db import create_db_and_tables
+from connection_db import init_db
 
 app = FastAPI()
 
 
 app.on_event("startup")
 def on_startup():
-    create_db_and_tables()
+    init_db()
 
 
 @app.post("/vuelos/", response_model=Vuelos, tags=["Vuelos"])
